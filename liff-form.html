@@ -1,1 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>メンテナンス報告フォーム</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a5276, #2e86c1);
+      color: white;
+      padding: 20px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .header h1 { font-size: 18px; font-weight: bold; }
+    .header p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #1a5276;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #d6eaf8;
+    }
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 6px;
+    }
+    .required { color: #e63946; margin-left: 4px; }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: #2e86c1;
+    }
+    textarea { min-height: 80px; resize: vertical; }
 
+    /* 種別ボタン */
+    .type-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .type-btn {
+      flex: 1;
+      padding: 12px 4px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .type-btn.selected {
+      border-color: #2e86c1;
+      background: #d6eaf8;
+      color: #1a5276;
+    }
+
+    /* カテゴリボタン */
+    .category-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .cat-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 12px 4px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cat-btn.selected {
+      border-color: #2e86c1;
+      background: #d6eaf8;
+      color: #1a5276;
+    }
+
+    /* 担当者グリッドボタン */
+    .staff-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .staff-btn {
+      padding: 10px 4px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      color: #333;
+    }
+    .staff-btn.selected {
+      border-color: #2e86c1;
+      background: #d6eaf8;
+      color: #1a5276;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #1a5276, #2e86c1);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .submit-btn:active { opacity: 0.85; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .success-msg {
+      display: none;
+      background: #d5f5e3;
+      border: 2px solid #27ae60;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      color: #1e8449;
+      font-weight: bold;
+      font-size: 15px;
+      margin-top: 12px;
+    }
+    .error-msg {
+      display: none;
+      background: #fff0f1;
+      border: 2px solid #e63946;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      color: #e63946;
+      font-size: 14px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 メンテナンス報告フォーム</h1>
+  <p>修理・交換・点検の報告を入力してください</p>
+</div>
+
+<!-- 種別 -->
+<div class="card">
+  <div class="card-title">🔧 報告種別</div>
+  <div class="field">
+    <label>種別 <span class="required">*</span></label>
+    <div class="type-buttons">
+      <button class="type-btn" onclick="selectType(this,'交換')">🔄 交換</button>
+      <button class="type-btn" onclick="selectType(this,'施工不良')">⚠️ 施工不良</button>
+    </div>
+    <input type="hidden" id="reportType">
+  </div>
+</div>
+
+<!-- 基本情報 -->
+<div class="card">
+  <div class="card-title">📝 基本情報</div>
+
+  <div class="field">
+    <label>伝票番号 <span class="required">*</span></label>
+    <input type="text" id="ticketNo" placeholder="例：1953882" inputmode="numeric">
+  </div>
+
+  <div class="field">
+    <label>カテゴリ <span class="required">*</span></label>
+    <div class="category-buttons">
+      <button class="cat-btn" onclick="selectCategory(this,'家電')">🏠 家電</button>
+      <button class="cat-btn" onclick="selectCategory(this,'家具')">🪑 家具</button>
+      <button class="cat-btn" onclick="selectCategory(this,'布団カーテン')">🛏️ 布団カーテン</button>
+    </div>
+    <input type="hidden" id="category">
+  </div>
+
+  <div class="field">
+    <label>商品名 <span class="required">*</span></label>
+    <input type="text" id="productName" placeholder="例：冷蔵庫112">
+  </div>
+
+  <div class="field">
+    <label>型番</label>
+    <input type="text" id="modelNo" placeholder="例：GJ-912">
+  </div>
+
+  <div class="field">
+    <label>年式</label>
+    <input type="text" id="year" placeholder="例：2025" inputmode="numeric">
+  </div>
+
+  <div class="field">
+    <label>詳細・理由 <span class="required">*</span></label>
+    <textarea id="detail" placeholder="例：冷えない、傷あり など"></textarea>
+  </div>
+</div>
+
+<!-- 担当情報 -->
+<div class="card">
+  <div class="card-title">👤 担当情報</div>
+
+  <div class="field">
+    <label>担当者 <span class="required">*</span></label>
+    <div class="staff-grid">
+      <button class="staff-btn" onclick="selectStaff(this,'西本')">西本</button>
+      <button class="staff-btn" onclick="selectStaff(this,'西野')">西野</button>
+      <button class="staff-btn" onclick="selectStaff(this,'坂口')">坂口</button>
+      <button class="staff-btn" onclick="selectStaff(this,'松本')">松本</button>
+      <button class="staff-btn" onclick="selectStaff(this,'田中')">田中</button>
+      <button class="staff-btn" onclick="selectStaff(this,'佐藤')">佐藤</button>
+      <button class="staff-btn" onclick="selectStaff(this,'太田')">太田</button>
+      <button class="staff-btn" onclick="selectStaff(this,'辻村')">辻村</button>
+      <button class="staff-btn" onclick="selectStaff(this,'大石')">大石</button>
+      <button class="staff-btn" onclick="selectStaff(this,'森下')">森下</button>
+      <button class="staff-btn" onclick="selectStaff(this,'稲尾')">稲尾</button>
+      <button class="staff-btn" onclick="selectStaff(this,'井上')">井上</button>
+      <button class="staff-btn" onclick="selectStaff(this,'西')">西</button>
+      <button class="staff-btn" onclick="selectStaff(this,'西山')">西山</button>
+      <button class="staff-btn" onclick="selectStaff(this,'千綿')">千綿</button>
+      <button class="staff-btn" onclick="selectStaff(this,'吉垣')">吉垣</button>
+      <button class="staff-btn" onclick="selectStaff(this,'石田')">石田</button>
+      <button class="staff-btn" onclick="selectStaff(this,'古川')">古川</button>
+      <button class="staff-btn" onclick="selectStaff(this,'増田')">増田</button>
+      <button class="staff-btn" onclick="selectStaff(this,'川崎')">川崎</button>
+    </div>
+    <input type="hidden" id="staff">
+  </div>
+
+  <div class="field">
+    <label>配送員</label>
+    <input type="text" id="driver" placeholder="配送員名（任意）">
+  </div>
+</div>
+
+<button class="submit-btn" id="submitBtn" onclick="submitForm()">📤 スプレッドシートに記録する</button>
+
+<div class="success-msg" id="successMsg">
+  ✅ 記録が完了しました！<br>スプレッドシートとグループLINEに反映されました。
+</div>
+<div class="error-msg" id="errorMsg"></div>
+
+<script>
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbq-8xp2WO8KrsrYy_pDrT-80VZEd7MesnnOwbbfewdF1SvsYw9hJ1rCHkyZfDu2GHeg/exec';
+
+  function selectType(btn, val) {
+    document.getElementById('reportType').value = val;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function selectCategory(btn, val) {
+    document.getElementById('category').value = val;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function selectStaff(btn, val) {
+    document.getElementById('staff').value = val;
+    document.querySelectorAll('.staff-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function submitForm() {
+    const reportType  = document.getElementById('reportType').value;
+    const ticketNo    = document.getElementById('ticketNo').value.trim();
+    const category    = document.getElementById('category').value;
+    const productName = document.getElementById('productName').value.trim();
+    const modelNo     = document.getElementById('modelNo').value.trim();
+    const year        = document.getElementById('year').value.trim();
+    const detail      = document.getElementById('detail').value.trim();
+    const staff       = document.getElementById('staff').value;
+    const driver      = document.getElementById('driver').value.trim();
+
+    if (!reportType)  { showError('種別を選択してください。'); return; }
+    if (!ticketNo)    { showError('伝票番号を入力してください。'); return; }
+    if (!category)    { showError('カテゴリを選択してください。'); return; }
+    if (!productName) { showError('商品名を入力してください。'); return; }
+    if (!detail)      { showError('詳細・理由を入力してください。'); return; }
+    if (!staff)       { showError('担当者を選択してください。'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '送信中...';
+
+    const data = {
+      formType: 'report',
+      reportType, ticketNo, category, productName, modelNo, year, detail, staff, driver
+    };
+
+    fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(() => {
+      document.getElementById('successMsg').style.display = 'block';
+      document.getElementById('errorMsg').style.display = 'none';
+      btn.style.display = 'none';
+    })
+    .catch(err => {
+      showError('送信に失敗しました: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = '📤 スプレッドシートに記録する';
+    });
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+</script>
+</body>
+</html>
